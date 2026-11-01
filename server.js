@@ -24,7 +24,7 @@ app.use(express.static(path.join(directoryName, 'public')));
 app.set('view engine', 'ejs');
 
 // Tell Express where to find your templates
-app.set('views', path.join(directoryName, 'src/views'));
+app.set('views', path.join(directoryName, 'views'));
 
 
 /**
