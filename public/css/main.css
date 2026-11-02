@@ -1,0 +1,188 @@
+/* Shared colors keep every page consistent. */
+:root {
+    color-scheme: light;
+    --ink: #203b35;
+    --muted: #52665f;
+    --green: #215d49;
+    --paper: #f4f6f0;
+    --border: #d3ddd2;
+}
+
+* {
+
+    box-sizing: border-box;
+
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+a {
+
+    color: var(--green);
+
+    text-underline-offset: 0.25em;
+
+}
+/* Show keyboard users which link has focus. */
+a:focus-visible {
+    outline: 3px solid #9a4b12;
+    outline-offset: 4px;
+}
+
+/* The skip link appears when reached with the Tab key. */
+.skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -6rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    z-index: 1;
+}
+.skip-link:focus {
+    top: 1rem;
+}
+
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.25rem max(1.25rem, calc((100% - 1120px) / 2));
+    background: white;
+    border-bottom: 1px solid var(--border);
+}
+.site-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+    line-height: 1.4;
+}
+.site-name span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+nav a {
+    display: block;
+    padding: 0.65rem 0.9rem;
+    border-radius: 0.4rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+nav a:hover {
+    background: #e7eee4;
+    text-decoration: underline;
+}
+
+main {
+    width: min(100% - 2.5rem, 1120px);
+    margin: 0 auto;
+    padding: 3.5rem 0 4.5rem;
+    flex: 1;
+}
+h1, h2 {
+    line-height: 1.2;
+    text-wrap: balance;
+}
+h1 {
+    margin: 0 0 1.5rem;
+    max-width: 22ch;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: -0.035em;
+}
+h2 {
+    font-size: 1.4rem;
+}
+p {
+    max-width: 68ch;
+    color: var(--muted);
+}
+
+/* Content lists become cards; columns adapt to the available width. */
+main ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+main li {
+    padding: 1.75rem;
+    background: white;
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--green);
+    border-radius: 0.65rem;
+    overflow-wrap: anywhere;
+}
+main li h2 {
+    margin-top: 0;
+}
+main li p:last-child {
+    margin-bottom: 0;
+}
+img {
+    max-width: 100%;
+    height: auto;
+}
+main li img {
+    display: block;
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    margin: 0 auto 1.5rem;
+}
+.main-logo {
+    display: block;
+    width: 340px;
+    margin: 2.5rem auto 0;
+    border-radius: 1rem;
+}
+footer {
+    padding: 1.5rem 1.25rem;
+    background: #203b35;
+    text-align: center;
+}
+footer p {
+    margin: 0 auto;
+    color: #f4f6f0;
+    font-size: 0.9rem;
+}
+
+/* On smaller screens, stack the header and use one card per row. */
+@media (max-width: 700px) {
+    .site-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    nav a {
+        padding: 0.65rem 0.75rem;
+    }
+    main {
+        padding: 2.5rem 0 3rem;
+    }
+    main ul {
+        grid-template-columns: 1fr;
+    }
+}
