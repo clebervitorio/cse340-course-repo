@@ -2,13 +2,13 @@
   "name": "cse340",
   "version": "1.0.0",
   "description": "CSE340 First NODE js application",
-  "homepage": "https://github.com/clebervitorio/cse340-course-repo#readme",
+  "homepage": "https://github.com/DarkZife/CSE340#readme",
   "bugs": {
-    "url": "https://github.com/clebervitorio/cse340-course-repoissues"
+    "url": "https://github.com/DarkZife/CSE340/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/clebervitorio/cse340-course-repo.git"
+    "url": "git+https://github.com/DarkZife/CSE340.git"
   },
   "license": "ISC",
   "author": "",
@@ -20,7 +20,8 @@
   },
   "dependencies": {
     "ejs": "^7.0.2",
-    "express": "^5.3.0"
+    "express": "^5.3.0",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
