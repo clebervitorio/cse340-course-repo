@@ -6,10 +6,10 @@ import { getAllOrganizations } from './src/models/organizations.js';
 import { getAllProjects } from './src/models/projects.js';
 
 // Define the application environment
-const nodeEnv = process.env.NODE_ENV?.toLowerCase() || 'production';
+const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
 
 // Define the port number the server will listen on
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 const fileName = fileURLToPath(import.meta.url);
 const directoryName = path.dirname(fileName);
@@ -57,12 +57,13 @@ app.get('/categories', async (req, res) => {
     res.render('categories', { title });
 });
 
-app.listen(port, async () => {
+app.listen(PORT, async () => {
   try {
     await testConnection();
-    console.log(`Server is running at http://127.0.0.1:${port}`);
-    console.log(`Environment: ${nodeEnv}`);
+    console.log(`Server is running at http://127.0.0.1:${PORT}`);
+    console.log(`Environment: ${NODE_ENV}`);
   } catch (error) {
     console.error('Error connecting to the database:', error);
+    process.exit(1); // Exit the process with an error code
   }
 });
