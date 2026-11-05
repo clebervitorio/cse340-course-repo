@@ -16,7 +16,7 @@ CREATE TABLE service_projects (
 );
 
 INSERT INTO service_projects
-    (organization_id, title, description, location, project_date)
+    (organization_id, title, description, location, date)
 VALUES
     -- Organization 1
     (1, 'Math Tutoring Night', 'Help middle school students practice fractions and algebra.', 'Riverside Library', '2027-04-05'),
