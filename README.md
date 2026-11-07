@@ -1,2 +1,2 @@
-# cse340-course-repo
+# CSE340-COURSE-REPO
 CSE340 Class
