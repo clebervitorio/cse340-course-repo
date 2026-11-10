@@ -6,6 +6,28 @@ CREATE TABLE organization (
     logo_filename VARCHAR(255) NOT NULL
 );
 
+INSERT INTO organization
+    (name, description, contact_email, logo_filename)
+VALUES
+    (
+        'BrightFuture Builders',
+        'Supports education through tutoring and community learning.',
+        'info@brightfuture.org',
+        'brightfuture-logo.png'
+    ),
+    (
+        'GreenHarvest Growers',
+        'Supports community gardens and environmental service.',
+        'contact@greenharvest.org',
+        'greenharvest-logo.png'
+    ),
+    (
+        'UnityServe Volunteers',
+        'Connects volunteers with opportunities to serve their neighbors.',
+        'hello@unityserve.org',
+        'unityserve-logo.png'
+    );
+
 CREATE TABLE service_projects (
     project_id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL REFERENCES organization(organization_id),
@@ -38,3 +60,33 @@ VALUES
     (3, 'Neighborhood Coat Closet', 'Sort donated jackets by size and restock the clothing racks.', 'Oak Street Community Center', '2027-04-14'),
     (3, 'Blood Drive Welcome Team', 'Greet donors and guide them to the check-in desk.', 'Eastside Community Hall', '2027-04-16'),
     (3, 'Community Dinner', 'Set tables, serve meals, and clean up after a neighborhood dinner.', 'Main Street Fellowship Hall', '2027-04-18');
+
+CREATE TABLE categories (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE project_categories (
+    project_id INTEGER NOT NULL
+        REFERENCES service_projects(project_id) ON DELETE CASCADE,
+    category_id INTEGER NOT NULL
+        REFERENCES categories(category_id) ON DELETE CASCADE,
+    PRIMARY KEY (project_id, category_id)
+);
+
+INSERT INTO categories (name)
+VALUES
+    ('Environmental'),
+    ('Educational'),
+    ('Community Service');
+
+INSERT INTO project_categories (project_id, category_id)
+SELECT p.project_id, c.category_id
+FROM service_projects AS p
+JOIN categories AS c
+    ON c.name = CASE
+        WHEN p.organization_id = 1 THEN 'Educational'
+        WHEN p.organization_id = 2 THEN 'Environmental'
+        ELSE 'Community Service'
+    END
+ON CONFLICT (project_id, category_id) DO NOTHING;
