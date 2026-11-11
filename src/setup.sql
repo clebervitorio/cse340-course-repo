@@ -1,3 +1,10 @@
+-- 1. Drop tables if they already exist (in reverse order, due to foreign key dependencies)
+DROP TABLE IF EXISTS project_categories;
+DROP TABLE IF EXISTS projects;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS organizations;
+
+-- 2. Create the organizations table first
 CREATE TABLE organization (
     organization_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
@@ -6,6 +13,7 @@ CREATE TABLE organization (
     logo_filename VARCHAR(255) NOT NULL
 );
 
+-- 3. Insert the base organizations (IDs 1, 2, and 3)
 INSERT INTO organization
     (name, description, contact_email, logo_filename)
 VALUES
@@ -28,6 +36,7 @@ VALUES
         'unityserve-logo.png'
     );
 
+-- 4. Create the service_projects table
 CREATE TABLE service_projects (
     project_id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL REFERENCES organization(organization_id),
@@ -37,6 +46,7 @@ CREATE TABLE service_projects (
     date DATE NOT NULL
 );
 
+-- 5. Insert the base service projects (IDs 1 through 15)
 INSERT INTO service_projects
     (organization_id, title, description, location, date)
 VALUES
@@ -61,11 +71,13 @@ VALUES
     (3, 'Blood Drive Welcome Team', 'Greet donors and guide them to the check-in desk.', 'Eastside Community Hall', '2027-04-16'),
     (3, 'Community Dinner', 'Set tables, serve meals, and clean up after a neighborhood dinner.', 'Main Street Fellowship Hall', '2027-04-18');
 
+-- 6. Create the categories table and the project_categories join table
 CREATE TABLE categories (
     category_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
+-- 7. Create the project_categories join table
 CREATE TABLE project_categories (
     project_id INTEGER NOT NULL
         REFERENCES service_projects(project_id) ON DELETE CASCADE,
@@ -74,12 +86,14 @@ CREATE TABLE project_categories (
     PRIMARY KEY (project_id, category_id)
 );
 
+-- 8. Insert the base categories
 INSERT INTO categories (name)
 VALUES
     ('Environmental'),
     ('Educational'),
     ('Community Service');
 
+-- 9. Assign categories to projects based on their organization
 INSERT INTO project_categories (project_id, category_id)
 SELECT p.project_id, c.category_id
 FROM service_projects AS p
