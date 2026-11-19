@@ -205,6 +205,42 @@ footer p {
     font-size: 0.9rem;
 }
 
+/* Flash messages */
+.alert {
+    width: min(100% - 2.5rem, 1120px);
+    margin: 1.25rem auto 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid;
+    border-left-width: 5px;
+    border-radius: 0.65rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.alert.success {
+    color: #173d27;
+    background-color: #edf7ef;
+    border-color: #24543b;
+}
+
+.alert.error {
+    color: #721c24;
+    background-color: #fcebed;
+    border-color: #a12d39;
+}
+
+.alert.warning {
+    color: #664d03;
+    background-color: #fff8df;
+    border-color: #947000;
+}
+
+.alert.info {
+    color: #17465b;
+    background-color: #eaf4fa;
+    border-color: #276580;
+}
+
 /* On smaller screens, stack the header and use one card per row. */
 @media (max-width: 700px) {
     .site-header {
