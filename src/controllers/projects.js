@@ -1,6 +1,6 @@
 import { getUpcomingProjects, getProjectDetails } from '../models/projects.js';
 import { getCategoriesByProjectId } from '../models/categories.js';
-import { createProject } from '../models/projects.js';
+import { createProject, updateProject } from '../models/projects.js';
 import { getAllOrganizations } from '../models/organizations.js';
 import { body, validationResult } from 'express-validator';
 
@@ -94,4 +94,58 @@ const processNewProjectForm = async (req, res) => {
     }
 };
 
-export { showProjectsPage, showProjectDetailsPage, showNewProjectForm, processNewProjectForm, projectValidation };
+const showEditProjectForm = async (req, res, next) => {
+    const projectId = Number(req.params.id);
+
+    if (!Number.isInteger(projectId) || projectId < 1) {
+        const error = new Error('Project not found');
+        error.status = 404;
+        return next(error);
+    }
+
+    const projectDetails = await getProjectDetails(projectId);
+
+    if (!projectDetails) {
+        const error = new Error('Project not found');
+        error.status = 404;
+        return next(error);
+    }
+
+    const organizations = await getAllOrganizations();
+
+    res.render('edit-project', {
+        title: 'Edit Project',
+        projectDetails,
+        organizations
+    });
+};
+
+const processEditProjectForm = async (req, res, next) => {
+    const projectId = Number(req.params.id);
+
+    if (!Number.isInteger(projectId) || projectId < 1) {
+        const error = new Error('Project not found');
+        error.status = 404;
+        return next(error);
+    }
+
+    const results = validationResult(req);
+
+    if (!results.isEmpty()) {
+        results.array().forEach((error) => {
+            req.flash('error', error.msg);
+        });
+
+        return res.redirect(`/edit-project/${projectId}`);
+    }
+
+    const { title, description, location, date, organizationId } = req.body;
+
+    await updateProject( projectId, organizationId, title, description, location, date );
+
+    req.flash('success', 'Project updated successfully!');
+
+    res.redirect(`/project/${projectId}`);
+};
+
+export { showProjectsPage, showProjectDetailsPage, showNewProjectForm, processNewProjectForm, showEditProjectForm, processEditProjectForm, projectValidation };
