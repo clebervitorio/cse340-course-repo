@@ -55,7 +55,8 @@ const showCategoryDetailsPage = async (req, res, next) => {
 };
 
 const showAssignCategoriesForm = async (req, res) => {
-    const projectId = req.params.projectId;
+    // const projectId = req.params.projectId;
+    const { projectId } = req.params; // Get projectId from the form submission
 
     const projectDetails = await getProjectDetails(projectId);
     const categories = await getAllCategories();
@@ -67,7 +68,8 @@ const showAssignCategoriesForm = async (req, res) => {
 };
 
 const processAssignCategoriesForm = async (req, res) => {
-    const projectId = req.params.projectId;
+    //const projectId = req.params.projectId;
+    const {projectId} = req.params; // Get projectId from the form submission
     const selectedCategoryIds = req.body.categoryIds || [];
     
     // Ensure selectedCategoryIds is an array
