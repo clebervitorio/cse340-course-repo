@@ -2,6 +2,7 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { testConnection } from './src/models/db.js';
+import 'dotenv/config';
 import router from './src/routes.js';
 import session from 'express-session';
 import flash from './src/middleware/flash.js';
@@ -17,7 +18,7 @@ const directoryName = path.dirname(fileName);
 
 const app = express();
 
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const {SESSION_SECRET} = process.env;
 
 /**
   * Configure Express middleware
@@ -29,8 +30,14 @@ const SESSION_SECRET = process.env.SESSION_SECRET;
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 60 * 60 * 1000 } // Session expires after 1 hour of inactivity
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+        maxAge: 60 * 60 * 1000,
+        httpOnly: true,
+        secure: NODE_ENV === 'production',
+        sameSite: 'lax'
+    }
 }));
 
 // Use flash message middleware
@@ -82,11 +89,13 @@ app.use((err, req, res, next) => {
     const template = status === 404 ? '404' : '500';
     
     // Prepare data for the template
-    const context = {
-        title: status === 404 ? 'Page Not Found' : 'Server Error',
-        error: err.message,
-        stack: err.stack
-    };
+   const context = {
+    title: status === 404 ? 'Page Not Found' : 'Server Error',
+    error: NODE_ENV === 'development'
+        ? err.message
+        : 'An unexpected error occurred.',
+    stack: NODE_ENV === 'development' ? err.stack : null
+};
 
     // Render the appropriate error template
     res.status(status).render(`errors/${template}`, context);
@@ -95,7 +104,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, async () => {
   try {
     await testConnection();
-    console.log(`Server is running at http://127.0.0.1:${PORT}`);
+    console.log(`Server is running at ${PORT}`);
     console.log(`Environment: ${NODE_ENV}`);
   } catch (error) {
     console.error('Error connecting to the database:', error);
