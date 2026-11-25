@@ -3,6 +3,8 @@ DROP TABLE IF EXISTS project_categories;
 DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS organizations;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS roles;
 
 -- 2. Create the organizations table first
 CREATE TABLE organization (
@@ -104,3 +106,69 @@ JOIN categories AS c
         ELSE 'Community Service'
     END
 ON CONFLICT (project_id, category_id) DO NOTHING;
+
+-- Roles must exist before users can reference them.
+CREATE TABLE roles (
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(50) UNIQUE NOT NULL,
+    role_description TEXT
+);
+
+INSERT INTO roles (role_name, role_description)
+VALUES
+    ('user', 'Standard user with basic access'),
+    ('admin', 'Administrator with full system access');
+
+-- Verify the initial roles.
+SELECT * FROM roles;
+
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role_id INTEGER REFERENCES roles(role_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Optional verification: run this block manually in pgAdmin.
+-- ROLLBACK removes the test record without changing existing users.
+/*
+BEGIN;
+
+INSERT INTO users (name, email, password_hash, role_id)
+SELECT 'testuser', 'test@example.com', 'placeholder_hash', role_id
+FROM roles
+WHERE role_name = 'user';
+
+SELECT u.user_id, u.name, u.email, r.role_name, r.role_description
+FROM users AS u
+JOIN roles AS r ON u.role_id = r.role_id
+WHERE u.email = 'test@example.com';
+
+DELETE FROM users WHERE email = 'test@example.com';
+
+ROLLBACK;
+*/
+
+CREATE TABLE roles (
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(50) UNIQUE NOT NULL,
+    role_description TEXT
+);
+
+INSERT INTO roles (role_name, role_description) VALUES 
+    ('user', 'Standard user with basic access'),
+    ('admin', 'Administrator with full system access');
+
+-- Verify the data was inserted
+SELECT * FROM roles;
+
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role_id INTEGER REFERENCES roles(role_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
