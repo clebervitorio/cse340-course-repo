@@ -5,6 +5,7 @@ import { testConnection } from './src/models/db.js';
 import router from './src/routes.js';
 import session from 'express-session';
 import flash from './src/middleware/flash.js';
+import 'dotenv/config';
 
 // Define the application environment
 const nodeEnv = process.env.NODE_ENV?.toLowerCase() || 'production';
@@ -17,7 +18,7 @@ const directoryName = path.dirname(fileName);
 
 const app = express();
 
-const {SESSION_SECRET} = process.env;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 
 /**
   * Configure Express middleware
@@ -30,7 +31,13 @@ app.use(session({
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 60 * 60 * 1000 } // Session expires after 1 hour of inactivity
+    rolling: true,
+    cookie: {
+        maxAge: 60 * 60 * 1000,
+        httpOnly: true,
+        secure: nodeEnv === 'production',
+        sameSite: 'lax'
+    }
 }));
 
 // Use flash message middleware
@@ -105,5 +112,6 @@ app.listen(port, async () => {
     console.log(`Environment: ${nodeEnv}`);
   } catch (error) {
     console.error('Error connecting to the database:', error);
+    process.exit(1); // Exit the process with an error code
   }
 });

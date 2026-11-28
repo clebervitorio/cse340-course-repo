@@ -1,3 +1,10 @@
+DROP TABLE IF EXISTS project_categories;
+DROP TABLE IF EXISTS projects;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS organizations;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS roles;
+
 CREATE TABLE organization (
     organization_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
@@ -5,6 +12,43 @@ CREATE TABLE organization (
     contact_email VARCHAR(255) NOT NULL,
     logo_filename VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE service_projects (
+    project_id SERIAL PRIMARY KEY,
+    organization_id INTEGER NOT NULL REFERENCES organization(organization_id),
+    title VARCHAR(150) NOT NULL,
+    description TEXT NOT NULL,
+    location TEXT NOT NULL,
+    date DATE NOT NULL
+);
+
+CREATE TABLE categories (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE project_categories (
+    project_id INTEGER NOT NULL
+        REFERENCES service_projects(project_id) ON DELETE CASCADE,
+    category_id INTEGER NOT NULL
+        REFERENCES categories(category_id) ON DELETE CASCADE,
+    PRIMARY KEY (project_id, category_id)
+);
+
+CREATE TABLE roles (
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(50) UNIQUE NOT NULL,
+    role_description TEXT
+);
+
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role_id INTEGER REFERENCES roles(role_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+); 
 
 INSERT INTO organization
     (name, description, contact_email, logo_filename)
@@ -27,15 +71,6 @@ VALUES
         'hello@unityserve.org',
         'unityserve-logo.png'
     );
-
-CREATE TABLE service_projects (
-    project_id SERIAL PRIMARY KEY,
-    organization_id INTEGER NOT NULL REFERENCES organization(organization_id),
-    title VARCHAR(150) NOT NULL,
-    description TEXT NOT NULL,
-    location TEXT NOT NULL,
-    date DATE NOT NULL
-);
 
 INSERT INTO service_projects
     (organization_id, title, description, location, date)
@@ -61,20 +96,6 @@ VALUES
     (3, 'Blood Drive Welcome Team', 'Greet donors and guide them to the check-in desk.', 'Eastside Community Hall', '2027-04-16'),
     (3, 'Community Dinner', 'Set tables, serve meals, and clean up after a neighborhood dinner.', 'Main Street Fellowship Hall', '2027-04-18');
 
-
-CREATE TABLE categories (
-    category_id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE
-);
-
-CREATE TABLE project_categories (
-    project_id INTEGER NOT NULL
-        REFERENCES service_projects(project_id) ON DELETE CASCADE,
-    category_id INTEGER NOT NULL
-        REFERENCES categories(category_id) ON DELETE CASCADE,
-    PRIMARY KEY (project_id, category_id)
-);
-
 INSERT INTO categories (name)
 VALUES
     ('Environmental'),
@@ -93,19 +114,10 @@ JOIN categories AS c
 ON CONFLICT (project_id, category_id) DO NOTHING;
 
 -- Roles must exist before users can reference them.
-CREATE TABLE roles (
-    role_id SERIAL PRIMARY KEY,
-    role_name VARCHAR(50) UNIQUE NOT NULL,
-    role_description TEXT
-);
-
 INSERT INTO roles (role_name, role_description)
 VALUES
     ('user', 'Standard user with basic access'),
     ('admin', 'Administrator with full system access');
-
--- Verify the initial roles.
-SELECT * FROM roles;
 
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
@@ -136,25 +148,10 @@ DELETE FROM users WHERE email = 'test@example.com';
 ROLLBACK;
 */
 
-
-CREATE TABLE roles (
-    role_id SERIAL PRIMARY KEY,
-    role_name VARCHAR(50) UNIQUE NOT NULL,
-    role_description TEXT
-);
-
 INSERT INTO roles (role_name, role_description) VALUES 
     ('user', 'Standard user with basic access'),
     ('admin', 'Administrator with full system access');
 
--- Verify the data was inserted
-SELECT * FROM roles;
-
-CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role_id INTEGER REFERENCES roles(role_id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-); 
+INSERT INTO users (name, email, password_hash, role_id) VALUES
+    ('Star Trek Fan', 'startrekfan@gmail.com', 'Abcd1234!', 1),
+    ('Star Wars Fan', 'starwarsfan@gmail.com', 'Abcd1234#', 2);
