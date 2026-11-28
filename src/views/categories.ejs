@@ -4,7 +4,9 @@
     <h1><%= title %></h1>
     <p>Explore the different ways you can make a difference in your community.</p>
 
-    <p><a href="/new-category">Create New Category</a></p>
+    <% if (user && user.role_name === 'admin') { %>
+        <p><a href="/new-category">Create New Category</a></p>
+    <% } %>
     <ul>
         <% categories.forEach(category => { %>
             <li>

@@ -2,16 +2,15 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { testConnection } from './src/models/db.js';
-import 'dotenv/config';
 import router from './src/routes.js';
 import session from 'express-session';
 import flash from './src/middleware/flash.js';
 
 // Define the application environment
-const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
+const nodeEnv = process.env.NODE_ENV?.toLowerCase() || 'production';
 
 // Define the port number the server will listen on
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 const fileName = fileURLToPath(import.meta.url);
 const directoryName = path.dirname(fileName);
@@ -30,14 +29,8 @@ const {SESSION_SECRET} = process.env;
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
-    rolling: true,
-    cookie: {
-        maxAge: 60 * 60 * 1000,
-        httpOnly: true,
-        secure: NODE_ENV === 'production',
-        sameSite: 'lax'
-    }
+    saveUninitialized: true,
+    cookie: { maxAge: 60 * 60 * 1000 } // Session expires after 1 hour of inactivity
 }));
 
 // Use flash message middleware
@@ -54,22 +47,23 @@ app.set('view engine', 'ejs');
 // Tell Express where to find your templates
 app.set('views', path.join(directoryName, 'src/views'));
 
-// Middleware to log all incoming requests
 app.use((req, res, next) => {
-    if (NODE_ENV === 'development') {
-        console.log(`${req.method} ${req.url}`);
-    }
-    next(); // Pass control to the next middleware or route
+  if (nodeEnv === 'development') {
+    console.log(`${req.method} ${req.url}`);
+  }
+  next();
 });
 
-// Middleware to make NODE_ENV available to all templates
 app.use((req, res, next) => {
     res.locals.isLoggedIn = false;
+    res.locals.user = null;
+
     if (req.session && req.session.user) {
         res.locals.isLoggedIn = true;
+        res.locals.user = req.session.user;
     }
 
-    res.locals.NODE_ENV = NODE_ENV;
+    res.locals.NODE_ENV = nodeEnv;
     next();
 });
 
@@ -78,41 +72,38 @@ app.use(router);
 
 // Catch-all route for 404 errors
 app.use((req, res, next) => {
-    const err = new Error('Page Not Found');
-    err.status = 404;
-    next(err);
+  const err = new Error('Page Not Found');
+  err.status = 404;
+  next(err);
 });
 
 // Global error handler
 app.use((err, req, res, next) => {
-    // Log error details for debugging
-    console.error('Error occurred:', err.message);
-    console.error('Stack trace:', err.stack);
-    
-    // Determine status and template
-    const status = err.status || 500;
-    const template = status === 404 ? '404' : '500';
-    
-    // Prepare data for the template
-   const context = {
-    title: status === 404 ? 'Page Not Found' : 'Server Error',
-    error: NODE_ENV === 'development'
-        ? err.message
-        : 'An unexpected error occurred.',
-    stack: NODE_ENV === 'development' ? err.stack : null
-};
+  // Log error details for debugging
+  console.error('Error occurred:', err.message);
+  console.error('Stack trace:', err.stack);
 
-    // Render the appropriate error template
-    res.status(status).render(`errors/${template}`, context);
+  // Determine status and template
+  const status = err.status || 500;
+  const template = status === 404 ? '404' : '500';
+
+  // Prepare data for the template
+  const context = {
+    title: status === 404 ? 'Page Not Found' : 'Server Error',
+    error: err.message,
+    stack: err.stack
+  };
+
+  // Render the appropriate error template
+  res.status(status).render(`errors/${template}`, context);
 });
 
-app.listen(PORT, async () => {
+app.listen(port, async () => {
   try {
     await testConnection();
-    console.log(`Server is running at ${PORT}`);
-    console.log(`Environment: ${NODE_ENV}`);
+    console.log(`Server is running at http://127.0.0.1:${port}`);
+    console.log(`Environment: ${nodeEnv}`);
   } catch (error) {
     console.error('Error connecting to the database:', error);
-    process.exit(1); // Exit the process with an error code
   }
 });
